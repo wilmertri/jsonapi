@@ -14,7 +14,7 @@ class CreateArticleTest extends TestCase
     /** @test */
     public function can_create_articles(): void
     {
-        $this->withoutExceptionHandling();
+
         $response = $this->postJson(route('api.v1.articles.create'), [
             'data' => [
                 'type' => 'articles',
@@ -49,5 +49,56 @@ class CreateArticleTest extends TestCase
                 ]
             ]
         ]);
+    }
+
+    /** @test */
+    public function title_is_required(): void
+    {
+
+        $response = $this->postJson(route('api.v1.articles.create'), [
+            'data' => [
+                'type' => 'articles',
+                'attributes' => [
+                    'slug' => 'new-article',
+                    'content' => 'Content of article'
+                ]
+            ]
+        ]);
+
+        $response->assertJsonValidationErrors('data.attributes.title');
+    }
+
+    /** @test */
+    public function slug_is_required(): void
+    {
+
+        $response = $this->postJson(route('api.v1.articles.create'), [
+            'data' => [
+                'type' => 'articles',
+                'attributes' => [
+                    'title' => 'New article',
+                    'content' => 'Content of article'
+                ]
+            ]
+        ]);
+
+        $response->assertJsonValidationErrors('data.attributes.slug');
+    }
+
+    /** @test */
+    public function content_is_required(): void
+    {
+
+        $response = $this->postJson(route('api.v1.articles.create'), [
+            'data' => [
+                'type' => 'articles',
+                'attributes' => [
+                    'title' => 'New article',
+                    'slug' => 'new-article',
+                ]
+            ]
+        ]);
+
+        $response->assertJsonValidationErrors('data.attributes.content');
     }
 }
