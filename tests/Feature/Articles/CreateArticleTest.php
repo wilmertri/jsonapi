@@ -63,9 +63,19 @@ class CreateArticleTest extends TestCase
                     'content' => 'Content of article'
                 ]
             ]
-        ]);
+        ])->dump();
 
-        $response->assertJsonValidationErrors('data.attributes.title');
+        $response->assertJsonStructure([
+            'errors' => [
+                ['title', 'detail', 'source' => ['pointer']]
+            ]
+        ])->assertJsonFragment([
+            'source' => ['pointer' => '/data/attributes/title']
+        ])->assertHeader(
+            'content-type', 'application/vnd.api+json'
+        )->assertStatus(422);
+
+        //$response->assertJsonValidationErrors('data.attributes.title');
     }
 
     /** @test */
