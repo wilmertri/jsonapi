@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Assert as PHPUnit;
 use PHPUnit\Framework\ExpectationFailedException;
@@ -31,7 +32,7 @@ trait MakesJsonApiRequest
     public function patchJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse
     {
         $headers['content-type'] = 'application/vnd.api+json';
-        return parent::postJson($uri, $data, $headers, $options);
+        return parent::patchJson($uri, $data, $headers, $options);
     }
 
     /**
@@ -42,9 +43,13 @@ trait MakesJsonApiRequest
         return function ($attribute) {
             /** @var TestResponse $this */
 
+            $pointer = Str::of($attribute)->startsWith('data')
+                ? "/" . str_replace('.', '/', $attribute)
+                : "/data/attributes/{$attribute}";
+
             try {
                 $this->assertJsonFragment([
-                    'source' => ['pointer' => "/data/attributes/{$attribute}"]
+                    'source' => ['pointer' => $pointer]
                 ]);
             }catch (ExpectationFailedException $e){
                 PHPUnit::fail(
