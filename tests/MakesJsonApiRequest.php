@@ -9,6 +9,7 @@ use PHPUnit\Framework\ExpectationFailedException;
 
 trait MakesJsonApiRequest
 {
+    protected bool $formatJsonApiDocument = true;
     protected function setUp(): void
     {
         parent::setUp();
@@ -26,13 +27,25 @@ trait MakesJsonApiRequest
     public function postJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse
     {
         $headers['content-type'] = 'application/vnd.api+json';
-        return parent::postJson($uri, $data, $headers, $options);
+
+        if ($this->formatJsonApiDocument)
+        {
+            $formattedData['data']['attributes'] = $data;
+            $formattedData['data']['type'] = (string)Str::of($uri)->after('api/v1/');
+        }
+
+        return parent::postJson($uri, $formattedData ?? $data, $headers, $options);
     }
 
     public function patchJson($uri, array $data = [], array $headers = [], $options = 0): TestResponse
     {
         $headers['content-type'] = 'application/vnd.api+json';
         return parent::patchJson($uri, $data, $headers, $options);
+    }
+
+    public function withoutJsonApiDocumentFormmating()
+    {
+        $this->formatJsonApiDocument = false;
     }
 
     /**
